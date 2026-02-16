@@ -140,6 +140,9 @@ void philo_error_util(t_philo **philos, t_data *data)
 // size_t number_of_philosophers(1), time_t time_to_die(2), time_t time_to_eat(3), time_t time_to_sleep(4), size_t number_of_times_each_philosopher_must_eat(5) )av
 int init_data(t_data *data, char **av, int ac)
 {
+	data->stop_flag_mutex_succ = 0;
+	data->log_mutex_succ = 0;
+
 	data->stop_flag = 0;
 	data->number_of_philosophers = ft_atoi(av[1]);
 
@@ -178,7 +181,7 @@ int init_philo(t_philo *philos, t_data *data)
 	// 構造体 初期化
 	while (i < data->number_of_philosophers)
 	{
-		philos[i].x = i;
+		philos[i].x = i + 1;
 
 		if (pthread_mutex_init(&philos[i].meal_mutex, NULL))
 			return 1; //失敗
@@ -242,10 +245,15 @@ int die_check(t_philo *philos, int i)
 
 	if (now - let_tmp > philos[i].data->time_to_die_ms)
 	{
+		long long timestamp = now - philo->data->start_time;
+
+		// log_mutex get -> stop_flag_mutex get-> stop_flag=1 (unlockしたときに他のスレッドは終了する) -> log die
+		pthread_mutex_lock(&philos[i].data->log_mutex);
 		pthread_mutex_lock(&philos[i].data->stop_flag_mutex);
 		philos[i].data->stop_flag = 1;
-		log_print(&philos[i], "died");
+		printf("%lld %zu died\n", timestamp, philos[i].x);
 		pthread_mutex_unlock(&philos[i].data->stop_flag_mutex);
+		pthread_mutex_unlock(&philos[i].data->log_mutex);
 
 		return 1; //正常に中断
 	}
@@ -259,7 +267,10 @@ int monitor_loop(t_philo *philos, t_data *data)
 		int i = 0;
 		int full_eat_people;
 
-		full_eat_people = 0;
+		if (data->number_of_times_each_philosopher_must_eat == -1)
+     		full_eat_people = 0;
+		else
+			full_eat_people = 1;
 
 		while (i < data->number_of_philosophers) // 全員チェック
 		{
@@ -351,6 +362,7 @@ void *philosopher_routine(void *arg)
 
 int forks_generate(t_data *data)
 {
+	data->forks_mutex_succ = 0;
 	data->forks_mutex = malloc(sizeof(pthread_mutex_t) * (data->number_of_philosophers)); // フォークメモリ確保
 	if (!data->forks_mutex)
 		return 1;

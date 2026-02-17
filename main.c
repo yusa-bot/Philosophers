@@ -89,13 +89,30 @@ int	ft_atoi(const char *str)
 	while (*str >= '0' && *str <= '9')
 	{
 		if (check_overflow(sign, result, *str) == 1)
-			return ((int)LONG_MAX);
+			return (-2);
 		if (check_overflow(sign, result, *str) == -1)
-			return ((int)LONG_MIN);
+			return (-2);
 		result = result * 10 + (long)(*str - '0');
 		str++;
 	}
 	return ((int)(result * sign));
+}
+
+int ft_usleep(int mcs)
+{
+	while (mcs >= 1000000)
+	{
+		if (usleep(999999) < 0)
+			return 1;
+		mcs -= 999999;
+	}
+
+	if (mcs > 0)
+	{
+		if (usleep(mcs) < 0)
+			return 1;
+	}
+	return 0;
 }
 
 long long get_time_ms(void)
@@ -119,18 +136,25 @@ void mutexes_destroy(t_data *data, t_philo *philos)
 	int i = 0;
 	if (data->forks_mutex_succ)
 	{
-		while (i++ < data->number_of_philosophers)
+		while (i < data->number_of_philosophers)
+		{
 			pthread_mutex_destroy(&data->forks_mutex[i]);
+			i++;
+		}
 	}
 
 	i = 0;
-	while (i++ < data->number_of_philosophers)
-		pthread_mutex_destroy(&philos[i].meal_mutex);
+	while (i < data->number_of_philosophers)
+	{
+		if (philos[i].meal_mutex_succ)
+			pthread_mutex_destroy(&philos[i].meal_mutex);
+		i++;
+	}
 }
 
 void philo_error_util(t_philo **philos, t_data *data)
 {
-	mutexes_destroy(data, philos);
+	mutexes_destroy(data, *philos);
 	free(data->forks_mutex);
 
 	free(*philos);
@@ -146,14 +170,14 @@ int init_data(t_data *data, char **av, int ac)
 	data->stop_flag = 0;
 	data->number_of_philosophers = ft_atoi(av[1]);
 
+	data->time_to_die_ms = ft_atoi(av[2]);
+	data->time_to_eat_mcs = ft_atoi(av[3]) * 1000;
+	data->time_to_sleep_mcs = ft_atoi(av[4]) * 1000;
+
 	if (ac == 6)
 		data->number_of_times_each_philosopher_must_eat = ft_atoi(av[5]);
 	else
 		data->number_of_times_each_philosopher_must_eat = -1;
-
-	data->time_to_eat_mcs = ft_atoi(av[3]) * 1000;
-	data->time_to_sleep_mcs = ft_atoi(av[4]) * 1000;
-	data->time_to_die_ms = ft_atoi(av[2]);
 
 	// forks_mutexはmainで作成済
 
@@ -166,9 +190,8 @@ int init_data(t_data *data, char **av, int ac)
 
 	// 範囲チェック
 	if (data->number_of_philosophers < 1 \
-		|| (data->number_of_times_each_philosopher_must_eat == 0 || data->number_of_times_each_philosopher_must_eat < -1) \
 		|| data->time_to_die_ms < 1 || data->time_to_eat_mcs < 1 || data->time_to_sleep_mcs < 1 \
-		|| (ft_atoi(av[3]) >= 1000 || ft_atoi(av[4]) >= 1000)) // usleep
+		|| (data->number_of_times_each_philosopher_must_eat == 0 || data->number_of_times_each_philosopher_must_eat < -1))
 			return 1;
 
 	return 0;
@@ -182,15 +205,14 @@ int init_philo(t_philo *philos, t_data *data)
 	while (i < data->number_of_philosophers)
 	{
 		philos[i].x = i + 1;
+		philos[i].meal_mutex_succ = 0;
 
 		if (pthread_mutex_init(&philos[i].meal_mutex, NULL))
 			return 1; //失敗
 		philos[i].meal_mutex_succ = 1;
 
 		philos[i].eat_count = 0;
-
-		long long now = get_time_ms();
-		philos[i].last_eat_time = now;
+		philos[i].last_eat_time = 0;
 
 		// 自分の左右forkの番号を教える
 		philos[i].fork_left = &data->forks_mutex[i];
@@ -245,7 +267,7 @@ int die_check(t_philo *philos, int i)
 
 	if (now - let_tmp > philos[i].data->time_to_die_ms)
 	{
-		long long timestamp = now - philo->data->start_time;
+		long long timestamp = now - philos[i].data->start_time;
 
 		// log_mutex get -> stop_flag_mutex get-> stop_flag=1 (unlockしたときに他のスレッドは終了する) -> log die
 		pthread_mutex_lock(&philos[i].data->log_mutex);
@@ -260,7 +282,7 @@ int die_check(t_philo *philos, int i)
 	return 0; //正常に継続
 }
 
-int monitor_loop(t_philo *philos, t_data *data)
+void monitor_loop(t_philo *philos, t_data *data)
 {
 	while (1) // 無限監視
 	{
@@ -276,7 +298,7 @@ int monitor_loop(t_philo *philos, t_data *data)
 		{
 			// 餓死 チェック
 			if (die_check(philos, i))
-				return 0;
+				return ;
 
 			// みんな食べきったかチェック
 			if (data->number_of_times_each_philosopher_must_eat > -1)
@@ -297,13 +319,14 @@ int monitor_loop(t_philo *philos, t_data *data)
 			pthread_mutex_lock(&data->stop_flag_mutex);
 			data->stop_flag = 1;
 			pthread_mutex_unlock(&data->stop_flag_mutex);
-			return 0;
+			return ;
 		}
 
-		usleep(1000);
+		if (ft_usleep(1000))
+			return ;
 	}
 
-	return 0;
+	return ;
 }
 
 
@@ -332,7 +355,7 @@ void *philosopher_routine(void *arg)
 
 		// いただきます
 		log_print(philo, "is eating");
-		if (usleep(philo->data->time_to_eat_mcs) < 0)
+		if (ft_usleep(philo->data->time_to_eat_mcs))
 			return (NULL); //失敗
 		// 食事関連 情報登録
 		pthread_mutex_lock(&philo->meal_mutex);
@@ -346,7 +369,7 @@ void *philosopher_routine(void *arg)
 
 		// 睡眠
 		log_print(philo, "is sleeping");
-		if (usleep(philo->data->time_to_sleep_mcs) < 0)
+		if (ft_usleep(philo->data->time_to_sleep_mcs))
 			return (NULL);
 
 		// 思考
@@ -423,8 +446,16 @@ int main(int ac, char **av)
 		return 1;
 	}
 
-	// log 基準時間
+	// log 基準時間 & last_eat_time を全員揃える
 	data.start_time = get_time_ms();
+	{
+		int j = 0;
+		while (j < data.number_of_philosophers)
+		{
+			philos[j].last_eat_time = data.start_time;
+			j++;
+		}
+	}
 
 	if (run_threads(philos, threads, &data)) // スレッド 開始
 	{ //失敗
@@ -435,7 +466,7 @@ int main(int ac, char **av)
 
 	monitor_loop(philos, &data); // 死亡/終了を監視
 
-	int i = 0; // 全員が安全に終了したことを保証 (stop_flagだが、usleepなどで各哲学者return にタイムラグ)
+	int i = 0; // 全員が安全に終了したことを保証 (stop_flagだが、ft_usleepなどで各哲学者return にタイムラグ)
 	while (i < data.number_of_philosophers)
 	{
 		pthread_join(threads[i], NULL); // 失敗は「無効なスレッドID」や「既にjoin済み」の場合

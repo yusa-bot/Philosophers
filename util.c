@@ -1,4 +1,17 @@
-// ft_atoi
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   util.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/02/17 18:10:41 by ayusa             #+#    #+#             */
+/*   Updated: 2026/02/17 18:28:14 by ayusa            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "philo.h"
+
 static int	check_overflow(int sign, long current, char next)
 {
 	int	digit;
@@ -18,6 +31,7 @@ static int	check_overflow(int sign, long current, char next)
 	}
 	return (0);
 }
+
 int	ft_atoi(const char *str)
 {
 	int					sign;
@@ -46,42 +60,40 @@ int	ft_atoi(const char *str)
 	return ((int)(result * sign));
 }
 
-int ft_usleep(int us)
+int	ft_usleep(int us)
 {
 	while (us >= 1000000)
 	{
 		if (usleep(999999) < 0)
-			return 1;
+			return (1);
 		us -= 999999;
 	}
-
 	if (us > 0)
 	{
 		if (usleep(us) < 0)
-			return 1;
+			return (1);
 	}
-	return 0;
+	return (0);
 }
 
-long long get_time_us(void)
+long long	get_time_us(void)
 {
-	struct timeval tv;
+	struct timeval	tv;
 
 	if (gettimeofday(&tv, NULL) < 0)
-		return 1; //失敗
+		return (1);
 	return (tv.tv_sec * 1000000LL + tv.tv_usec);
 }
 
-
-void mutexes_destroy(t_data *data, t_philo *philos)
+void	mutexes_destroy(t_data *data, t_philo *philos)
 {
-	// mutex_destroy処理
+	int	i;
+
 	if (data->stop_flag_mutex_succ)
 		pthread_mutex_destroy(&data->stop_flag_mutex);
 	if (data->log_mutex_succ)
 		pthread_mutex_destroy(&data->log_mutex);
-
-	int i = 0;
+	i = 0;
 	if (data->forks_mutex_succ)
 	{
 		while (i < data->number_of_philosophers)
@@ -90,7 +102,6 @@ void mutexes_destroy(t_data *data, t_philo *philos)
 			i++;
 		}
 	}
-
 	i = 0;
 	while (i < data->number_of_philosophers)
 	{
@@ -100,11 +111,9 @@ void mutexes_destroy(t_data *data, t_philo *philos)
 	}
 }
 
-void philo_error_util(t_philo **philos, t_data *data)
+void	philo_error_util(t_philo **philos, t_data *data)
 {
 	mutexes_destroy(data, *philos);
 	free(data->forks_mutex);
-
 	free(*philos);
-	return ;
 }

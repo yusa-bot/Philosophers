@@ -15,9 +15,9 @@ typedef struct s_data
 
 	int number_of_times_each_philosopher_must_eat;
 
-	int time_to_eat_mcs;
-	int time_to_sleep_mcs;
-	int time_to_die_ms;
+	int time_to_eat_us;
+	int time_to_sleep_us;
+	int time_to_die_us;
 
 	pthread_mutex_t *forks_mutex;
 	pthread_mutex_t stop_flag_mutex;
@@ -50,116 +50,6 @@ void log_print(t_philo *philo, char *msg);
 
 ////////////////////////////////////
 
-// ft_atoi
-static int	check_overflow(int sign, long current, char next)
-{
-	int	digit;
-
-	digit = next - '0';
-	if (sign == 1)
-	{
-		if (current > LONG_MAX / 10
-			|| (current == LONG_MAX / 10 && digit > LONG_MAX % 10))
-			return (1);
-	}
-	if (sign == -1)
-	{
-		if (current > -(LONG_MIN / 10)
-			|| (current == -(LONG_MIN / 10) && digit > -(LONG_MIN % 10)))
-			return (-1);
-	}
-	return (0);
-}
-int	ft_atoi(const char *str)
-{
-	int					sign;
-	unsigned long int	result;
-
-	sign = 1;
-	result = 0;
-	while (*str == 32 || (*str >= 9 && *str <= 13))
-		str++;
-	if (*str == '-')
-	{
-		sign = -1;
-		str++;
-	}
-	else if (*str == '+')
-		str++;
-	while (*str >= '0' && *str <= '9')
-	{
-		if (check_overflow(sign, result, *str) == 1)
-			return (-2);
-		if (check_overflow(sign, result, *str) == -1)
-			return (-2);
-		result = result * 10 + (long)(*str - '0');
-		str++;
-	}
-	return ((int)(result * sign));
-}
-
-int ft_usleep(int mcs)
-{
-	while (mcs >= 1000000)
-	{
-		if (usleep(999999) < 0)
-			return 1;
-		mcs -= 999999;
-	}
-
-	if (mcs > 0)
-	{
-		if (usleep(mcs) < 0)
-			return 1;
-	}
-	return 0;
-}
-
-long long get_time_ms(void)
-{
-	struct timeval tv;
-
-	if (gettimeofday(&tv, NULL) < 0)
-		return 1; //失敗
-	return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
-}
-
-
-void mutexes_destroy(t_data *data, t_philo *philos)
-{
-	// mutex_destroy処理
-	if (data->stop_flag_mutex_succ)
-		pthread_mutex_destroy(&data->stop_flag_mutex);
-	if (data->log_mutex_succ)
-		pthread_mutex_destroy(&data->log_mutex);
-
-	int i = 0;
-	if (data->forks_mutex_succ)
-	{
-		while (i < data->number_of_philosophers)
-		{
-			pthread_mutex_destroy(&data->forks_mutex[i]);
-			i++;
-		}
-	}
-
-	i = 0;
-	while (i < data->number_of_philosophers)
-	{
-		if (philos[i].meal_mutex_succ)
-			pthread_mutex_destroy(&philos[i].meal_mutex);
-		i++;
-	}
-}
-
-void philo_error_util(t_philo **philos, t_data *data)
-{
-	mutexes_destroy(data, *philos);
-	free(data->forks_mutex);
-
-	free(*philos);
-	return ;
-}
 
 // size_t number_of_philosophers(1), time_t time_to_die(2), time_t time_to_eat(3), time_t time_to_sleep(4), size_t number_of_times_each_philosopher_must_eat(5) )av
 int init_data(t_data *data, char **av, int ac)
@@ -170,9 +60,9 @@ int init_data(t_data *data, char **av, int ac)
 	data->stop_flag = 0;
 	data->number_of_philosophers = ft_atoi(av[1]);
 
-	data->time_to_die_ms = ft_atoi(av[2]);
-	data->time_to_eat_mcs = ft_atoi(av[3]) * 1000;
-	data->time_to_sleep_mcs = ft_atoi(av[4]) * 1000;
+	data->time_to_die_us = ft_atoi(av[2]) * 1000;
+	data->time_to_eat_us = ft_atoi(av[3]) * 1000;
+	data->time_to_sleep_us = ft_atoi(av[4]) * 1000;
 
 	if (ac == 6)
 		data->number_of_times_each_philosopher_must_eat = ft_atoi(av[5]);
@@ -190,7 +80,7 @@ int init_data(t_data *data, char **av, int ac)
 
 	// 範囲チェック
 	if (data->number_of_philosophers < 1 \
-		|| data->time_to_die_ms < 1 || data->time_to_eat_mcs < 1 || data->time_to_sleep_mcs < 1 \
+		|| data->time_to_die_us < 1 || data->time_to_eat_us < 1 || data->time_to_sleep_us < 1 \
 		|| (data->number_of_times_each_philosopher_must_eat == 0 || data->number_of_times_each_philosopher_must_eat < -1))
 			return 1;
 
@@ -246,8 +136,8 @@ int run_threads(t_philo *philos, pthread_t *threads, t_data *data)
 void log_print(t_philo *philo, char *msg)
 {
 	// time stamp
-	long long now = get_time_ms();
-	long long timestamp = now - philo->data->start_time;
+	long long now = get_time_us();
+	long long timestamp = (now - philo->data->start_time) / 1000; // 表示時だけms変換
 
 	pthread_mutex_lock(&philo->data->log_mutex);
 	if (!philo->data->stop_flag)
@@ -258,16 +148,16 @@ void log_print(t_philo *philo, char *msg)
 int die_check(t_philo *philos, int i)
 {
 	// 現在時刻取得
-	long long now = get_time_ms();
+	long long now = get_time_us();
 
 	// 餓死していたら
 	pthread_mutex_lock(&philos[i].meal_mutex);
 	long long let_tmp = philos[i].last_eat_time;
 	pthread_mutex_unlock(&philos[i].meal_mutex);
 
-	if (now - let_tmp > philos[i].data->time_to_die_ms)
+	if (now - let_tmp > philos[i].data->time_to_die_us)
 	{
-		long long timestamp = now - philos[i].data->start_time;
+		long long timestamp = (now - philos[i].data->start_time) / 1000; // 表示時だけms変換
 
 		// log_mutex get -> stop_flag_mutex get-> stop_flag=1 (unlockしたときに他のスレッドは終了する) -> log die
 		pthread_mutex_lock(&philos[i].data->log_mutex);
@@ -354,12 +244,15 @@ void *philosopher_routine(void *arg)
 		}
 
 		// いただきます
-		log_print(philo, "is eating");
-		if (ft_usleep(philo->data->time_to_eat_mcs))
-			return (NULL); //失敗
-		// 食事関連 情報登録
 		pthread_mutex_lock(&philo->meal_mutex);
-		philo->last_eat_time = get_time_ms();
+		philo->last_eat_time = get_time_us();
+		pthread_mutex_unlock(&philo->meal_mutex);
+
+		log_print(philo, "is eating");
+		if (ft_usleep(philo->data->time_to_eat_us))
+			return (NULL); //失敗
+
+		pthread_mutex_lock(&philo->meal_mutex);
 		philo->eat_count++;
 		pthread_mutex_unlock(&philo->meal_mutex);
 
@@ -369,7 +262,7 @@ void *philosopher_routine(void *arg)
 
 		// 睡眠
 		log_print(philo, "is sleeping");
-		if (ft_usleep(philo->data->time_to_sleep_mcs))
+		if (ft_usleep(philo->data->time_to_sleep_us))
 			return (NULL);
 
 		// 思考
@@ -447,7 +340,7 @@ int main(int ac, char **av)
 	}
 
 	// log 基準時間 & last_eat_time を全員揃える
-	data.start_time = get_time_ms();
+	data.start_time = get_time_us();
 	{
 		int j = 0;
 		while (j < data.number_of_philosophers)
@@ -478,6 +371,8 @@ int main(int ac, char **av)
 	free(data.forks_mutex);
 	free(philos);
 	free(threads);
+
+	printf("clear\n");
 
 	return 0;
 }

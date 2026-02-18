@@ -27,8 +27,8 @@ typedef struct s_data
 	int				stop_flag;
 	size_t			n_philo;
 
-	int 			ac;
-	int			n_must_eat_per_philo;
+	int				ac;
+	int				n_must_eat_per_philo;
 
 	int				time_to_eat_us;
 	int				time_to_sleep_us;

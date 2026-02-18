@@ -6,7 +6,7 @@
 #    By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/02/17 20:20:42 by ayusa             #+#    #+#              #
-#    Updated: 2026/02/18 14:50:13 by ayusa            ###   ########.fr        #
+#    Updated: 2026/02/18 14:54:03 by ayusa            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -41,23 +41,3 @@ re: fclean all
 
 .PHONY: all clean fclean re
 
-void	log_print(t_philo *philo, char *msg)
-{
-	long long	now;
-	long long	timestamp;
-	int			now_flag;
-
-	now = get_time_us();
-	timestamp = (now - philo->data->start_time) / 1000;
-
-	pthread_mutex_lock(&philo->data->stop_flag_mutex);
-	now_flag = philo->data->stop_flag;
-	pthread_mutex_unlock(&philo->data->stop_flag_mutex);
-
-	if (!now_flag)
-	{
-		pthread_mutex_lock(&philo->data->log_mutex);
-		printf("%lld %zu %s\n", timestamp, philo->x, msg);
-		pthread_mutex_unlock(&philo->data->log_mutex);
-	}
-}

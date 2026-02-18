@@ -6,7 +6,7 @@
 /*   By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 20:10:31 by ayusa             #+#    #+#             */
-/*   Updated: 2026/02/17 20:10:42 by ayusa            ###   ########.fr       */
+/*   Updated: 2026/02/18 16:05:28 by ayusa            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,9 @@ static int	eat_routine(t_philo *philo)
 
 static void	take_forks(t_philo *philo)
 {
+	if (philo->x % 2 == 0)
+        ft_usleep(philo->data->time_to_eat_us);
+
 	if (philo->x % 2)
 	{
 		pthread_mutex_lock(philo->fork_left);
@@ -47,12 +50,27 @@ static void	take_forks(t_philo *philo)
 	}
 }
 
+void	if_one_philo(t_philo *philo)
+{
+	pthread_mutex_lock(philo->fork_left);
+	log_print(philo, "has taken a fork");
+	ft_usleep(philo->data->time_to_die_us);
+	pthread_mutex_unlock(philo->fork_left);
+}
+
 void	*philosopher_routine(void *arg)
 {
 	t_philo	*philo;
 	int		now_flag;
 
 	philo = (t_philo *)arg;
+
+	if (philo->data->n_philo == 1)
+	{
+		if_one_philo(philo);
+		return (NULL);
+	}
+
 	now_flag = 0;
 	while (!now_flag)
 	{

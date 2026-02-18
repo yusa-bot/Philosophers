@@ -6,7 +6,7 @@
 /*   By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 19:32:31 by ayusa             #+#    #+#             */
-/*   Updated: 2026/02/18 13:51:06 by ayusa            ###   ########.fr       */
+/*   Updated: 2026/02/18 17:09:43 by ayusa            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,10 @@
 
 static int	run_threads(t_philo *philos, pthread_t *threads, t_data *data)
 {
-	size_t	i;
+	int	i;
 
 	i = 0;
-	while (i < data->n_philo)
+	while (i < (int)data->n_philo)
 	{
 		if (pthread_create(&threads[i], NULL, philosopher_routine, &philos[i]))
 		{

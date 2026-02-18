@@ -6,7 +6,7 @@
 /*   By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 20:10:31 by ayusa             #+#    #+#             */
-/*   Updated: 2026/02/18 16:05:28 by ayusa            ###   ########.fr       */
+/*   Updated: 2026/02/18 16:40:09 by ayusa            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,9 +31,6 @@ static int	eat_routine(t_philo *philo)
 
 static void	take_forks(t_philo *philo)
 {
-	if (philo->x % 2 == 0)
-        ft_usleep(philo->data->time_to_eat_us);
-
 	if (philo->x % 2)
 	{
 		pthread_mutex_lock(philo->fork_left);
@@ -58,32 +55,38 @@ void	if_one_philo(t_philo *philo)
 	pthread_mutex_unlock(philo->fork_left);
 }
 
+static int	philo_cycle(t_philo *philo)
+{
+	int	stop;
+
+	take_forks(philo);
+	if (eat_routine(philo))
+		return (1);
+	log_print(philo, "is sleeping");
+	if (ft_usleep(philo->data->time_to_sleep_us))
+		return (1);
+	log_print(philo, "is thinking");
+	pthread_mutex_lock(&philo->data->stop_flag_mutex);
+	stop = philo->data->stop_flag;
+	pthread_mutex_unlock(&philo->data->stop_flag_mutex);
+	return (stop);
+}
+
 void	*philosopher_routine(void *arg)
 {
 	t_philo	*philo;
-	int		now_flag;
+	int		stop;
 
 	philo = (t_philo *)arg;
-
 	if (philo->data->n_philo == 1)
 	{
 		if_one_philo(philo);
 		return (NULL);
 	}
-
-	now_flag = 0;
-	while (!now_flag)
-	{
-		take_forks(philo);
-		if (eat_routine(philo))
-			return (NULL);
-		log_print(philo, "is sleeping");
-		if (ft_usleep(philo->data->time_to_sleep_us))
-			return (NULL);
-		log_print(philo, "is thinking");
-		pthread_mutex_lock(&philo->data->stop_flag_mutex);
-		now_flag = philo->data->stop_flag;
-		pthread_mutex_unlock(&philo->data->stop_flag_mutex);
-	}
+	if (philo->x % 2 == 0)
+		ft_usleep(philo->data->time_to_eat_us);
+	stop = 0;
+	while (!stop)
+		stop = philo_cycle(philo);
 	return (NULL);
 }

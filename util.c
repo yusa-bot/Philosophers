@@ -19,7 +19,6 @@ void	log_print(t_philo *philo, char *msg)
 
 	now = get_time_us();
 	timestamp = (now - philo->data->start_time) / 1000;
-
 	pthread_mutex_lock(&philo->data->log_mutex);
 	pthread_mutex_lock(&philo->data->stop_flag_mutex);
 	if (!philo->data->stop_flag)

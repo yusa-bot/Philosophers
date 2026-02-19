@@ -6,7 +6,7 @@
 /*   By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 20:11:03 by ayusa             #+#    #+#             */
-/*   Updated: 2026/02/18 14:33:42 by ayusa            ###   ########.fr       */
+/*   Updated: 2026/02/19 23:05:30 by ayusa            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,6 @@ void	monitor_loop(t_philo *philos, t_data *data)
 			pthread_mutex_unlock(&data->stop_flag_mutex);
 			return ;
 		}
-		if (ft_usleep(1000))
-			return ;
+		ft_usleep(1000);
 	}
 }

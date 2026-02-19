@@ -6,13 +6,13 @@
 /*   By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 20:13:19 by ayusa             #+#    #+#             */
-/*   Updated: 2026/02/19 22:15:28 by ayusa            ###   ########.fr       */
+/*   Updated: 2026/02/19 23:17:27 by ayusa            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-static int mutexes_init(t_data *data)
+static int	mutexes_init(t_data *data)
 {
 	if (pthread_mutex_init(&data->stop_flag_mutex, NULL))
 		return (1);
@@ -23,7 +23,7 @@ static int mutexes_init(t_data *data)
 	if (pthread_mutex_init(&data->start_mutex, NULL))
 		return (1);
 	data->start_mutex_succ = 1;
-	return (1);
+	return (0);
 }
 
 // av: n_philo(1) t_die(2) t_eat(3) t_sleep(4) n_must_eat_per_philo(5)

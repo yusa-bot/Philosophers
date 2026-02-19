@@ -6,13 +6,13 @@
 /*   By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 19:32:31 by ayusa             #+#    #+#             */
-/*   Updated: 2026/02/19 22:12:13 by ayusa            ###   ########.fr       */
+/*   Updated: 2026/02/19 23:25:12 by ayusa            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-static int run_pthreads(t_philo *philos, pthread_t *pthreads, t_data *data)
+static int	run_pthreads(t_philo *philos, pthread_t *pthreads, t_data *data)
 {
 	int	i;
 
@@ -34,7 +34,8 @@ static int run_pthreads(t_philo *philos, pthread_t *pthreads, t_data *data)
 	return (0);
 }
 
-static int	ready_start_pthreads(t_philo *philos, pthread_t *pthreads, t_data *data)
+static int	ready_start_pthreads(t_philo *philos,
+	pthread_t *pthreads, t_data *data)
 {
 	int	i;
 
@@ -48,8 +49,8 @@ static int	ready_start_pthreads(t_philo *philos, pthread_t *pthreads, t_data *da
 		i++;
 	}
 	pthread_mutex_lock(&data->start_mutex);
-    data->start_ready = 1;
-    pthread_mutex_unlock(&data->start_mutex);
+	data->start_ready = 1;
+	pthread_mutex_unlock(&data->start_mutex);
 	return (0);
 }
 

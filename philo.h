@@ -6,7 +6,7 @@
 /*   By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 19:32:12 by ayusa             #+#    #+#             */
-/*   Updated: 2026/02/19 22:15:36 by ayusa            ###   ########.fr       */
+/*   Updated: 2026/02/19 23:31:12 by ayusa            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,8 +38,8 @@ typedef struct s_data
 	pthread_mutex_t	stop_flag_mutex;
 	pthread_mutex_t	log_mutex;
 
-	int             start_ready;
-	pthread_mutex_t start_mutex;
+	int				start_ready;
+	pthread_mutex_t	start_mutex;
 
 	int				forks_mutex_succ;
 	int				stop_flag_mutex_succ;
@@ -63,23 +63,16 @@ typedef struct s_philo
 	t_data			*data;
 }					t_philo;
 
-// util.c
 void				log_print(t_philo *philo, char *msg);
-int					ft_usleep(long long us);
+void				ft_usleep(long long us);
 long long			get_time_us(void);
 int					ft_atoi(const char *str);
-
-// cleanup.c
 void				handle_cleanup(t_philo **philos, t_data *data);
-
-// monitor.c
 void				monitor_loop(t_philo *philos, t_data *data);
-
-// philo.c
 void				*philosopher_routine_handle(void *arg);
-
-// init.c
 int					init_all(char **av, t_philo **philos,
 						t_data *data, pthread_t **pthreads);
+int					eat_routine(t_philo *philo);
+int					think_routine(t_philo *philo);
 
 #endif

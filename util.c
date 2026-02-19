@@ -6,25 +6,30 @@
 /*   By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 18:10:41 by ayusa             #+#    #+#             */
-/*   Updated: 2026/02/19 15:36:22 by ayusa            ###   ########.fr       */
+/*   Updated: 2026/02/19 21:27:33 by ayusa            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	log_print(t_philo *philo, char *msg)
+void    log_print(t_philo *philo, char *msg)
 {
-	long long	now;
-	long long	timestamp;
+    long long   now;
+    long long   timestamp;
+    int         stop;
 
-	now = get_time_us();
-	timestamp = (now - philo->data->start_time) / 1000;
-	pthread_mutex_lock(&philo->data->log_mutex);
-	pthread_mutex_lock(&philo->data->stop_flag_mutex);
-	if (!philo->data->stop_flag)
-		printf("%lld %d %s\n", timestamp, philo->x, msg);
-	pthread_mutex_unlock(&philo->data->stop_flag_mutex);
-	pthread_mutex_unlock(&philo->data->log_mutex);
+    pthread_mutex_lock(&philo->data->log_mutex);
+    pthread_mutex_lock(&philo->data->stop_flag_mutex);
+    stop = philo->data->stop_flag;
+    pthread_mutex_unlock(&philo->data->stop_flag_mutex);
+
+    if (!stop)
+    {
+        now = get_time_us();
+        timestamp = (now - philo->data->start_time) / 1000;
+        printf("%lld %d %s\n", timestamp, philo->x, msg);
+    }
+    pthread_mutex_unlock(&philo->data->log_mutex);
 }
 
 long long	get_time_us(void)
@@ -36,18 +41,21 @@ long long	get_time_us(void)
 	return (tv.tv_sec * 1000000LL + tv.tv_usec);
 }
 
-int	ft_usleep(int us)
+int	ft_usleep(long long us)
 {
-	while (us >= 500)
+	long long	start;
+	long long	remaining;
+
+	start = get_time_us();
+	while (1)
 	{
-		if (usleep(499) < 0)
-			return (1);
-		us -= 499;
-	}
-	if (us > 0)
-	{
-		if (usleep(us) < 0)
-			return (1);
+		remaining = us - (get_time_us() - start);
+		if (remaining <= 0)
+			break ;
+		if (remaining > 500)
+			usleep(499);
+		else
+			usleep(remaining / 2);
 	}
 	return (0);
 }

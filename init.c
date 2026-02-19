@@ -6,11 +6,25 @@
 /*   By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 20:13:19 by ayusa             #+#    #+#             */
-/*   Updated: 2026/02/19 14:46:03 by ayusa            ###   ########.fr       */
+/*   Updated: 2026/02/19 22:15:28 by ayusa            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
+
+static int mutexes_init(t_data *data)
+{
+	if (pthread_mutex_init(&data->stop_flag_mutex, NULL))
+		return (1);
+	data->stop_flag_mutex_succ = 1;
+	if (pthread_mutex_init(&data->log_mutex, NULL))
+		return (1);
+	data->log_mutex_succ = 1;
+	if (pthread_mutex_init(&data->start_mutex, NULL))
+		return (1);
+	data->start_mutex_succ = 1;
+	return (1);
+}
 
 // av: n_philo(1) t_die(2) t_eat(3) t_sleep(4) n_must_eat_per_philo(5)
 static int	init_data(t_data *data, char **av)
@@ -26,12 +40,9 @@ static int	init_data(t_data *data, char **av)
 		data->n_must_eat_per_philo = ft_atoi(av[5]);
 	else
 		data->n_must_eat_per_philo = -1;
-	if (pthread_mutex_init(&data->stop_flag_mutex, NULL))
+	if (mutexes_init(data))
 		return (1);
-	data->stop_flag_mutex_succ = 1;
-	if (pthread_mutex_init(&data->log_mutex, NULL))
-		return (1);
-	data->log_mutex_succ = 1;
+	data->start_ready = 0;
 	if (data->n_philo < 1 || data->time_to_die_us < 1
 		|| data->time_to_eat_us < 1 || data->time_to_sleep_us < 1
 		|| data->n_must_eat_per_philo == 0 || data->n_must_eat_per_philo < -1)
@@ -42,8 +53,10 @@ static int	init_data(t_data *data, char **av)
 static int	init_philo(t_philo *philos, t_data *data)
 {
 	int	i;
+	int	n;
 
 	i = 0;
+	n = data->n_philo;
 	while (i < data->n_philo)
 	{
 		philos[i].x = i + 1;
@@ -55,10 +68,6 @@ static int	init_philo(t_philo *philos, t_data *data)
 		philos[i].last_eat_time = 0;
 		philos[i].fork_left = &data->forks_mutex[i];
 		philos[i].fork_right = &data->forks_mutex[(i + 1) % data->n_philo];
-
-		philos[i].left_philo_eat = 0;
-		philos[i].right_philo_eat = 0;
-
 		philos[i].data = data;
 		i++;
 	}
@@ -90,7 +99,7 @@ static int	forks_generate(t_data *data)
 }
 
 int	init_all(char **av, t_philo **philos,
-		t_data *data, pthread_t **threads)
+		t_data *data, pthread_t **pthreads)
 {
 	data->n_philo = ft_atoi(av[1]);
 	if (data->n_philo < 1)
@@ -102,12 +111,12 @@ int	init_all(char **av, t_philo **philos,
 		return (free(*philos), 1);
 	if (init_data(data, av))
 		return (handle_cleanup(philos, data), 1);
-	*threads = malloc(sizeof(pthread_t) * data->n_philo);
-	if (!*threads)
+	*pthreads = malloc(sizeof(pthread_t) * data->n_philo);
+	if (!*pthreads)
 		return (handle_cleanup(philos, data), 1);
 	if (init_philo(*philos, data))
 	{
-		free(*threads);
+		free(*pthreads);
 		handle_cleanup(philos, data);
 		return (1);
 	}

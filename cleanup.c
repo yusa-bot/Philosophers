@@ -6,7 +6,7 @@
 /*   By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 20:15:10 by ayusa             #+#    #+#             */
-/*   Updated: 2026/02/18 13:53:44 by ayusa            ###   ########.fr       */
+/*   Updated: 2026/02/19 21:34:07 by ayusa            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,8 @@ static void	mutexes_destroy(t_data *data, t_philo *philos)
 		pthread_mutex_destroy(&data->stop_flag_mutex);
 	if (data->log_mutex_succ)
 		pthread_mutex_destroy(&data->log_mutex);
+	if (data->start_mutex_succ)
+		pthread_mutex_destroy(&data->start_mutex);
 	i = 0;
 	if (data->forks_mutex_succ)
 	{

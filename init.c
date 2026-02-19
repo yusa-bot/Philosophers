@@ -41,7 +41,7 @@ static int	init_data(t_data *data, char **av)
 
 static int	init_philo(t_philo *philos, t_data *data)
 {
-	size_t	i;
+	int	i;
 
 	i = 0;
 	while (i < data->n_philo)
@@ -63,7 +63,7 @@ static int	init_philo(t_philo *philos, t_data *data)
 
 static int	forks_generate(t_data *data)
 {
-	size_t	i;
+	int	i;
 
 	data->forks_mutex_succ = 0;
 	data->forks_mutex

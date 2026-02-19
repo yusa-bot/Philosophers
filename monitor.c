@@ -28,7 +28,7 @@ static int	check_die_per_philo(t_philo *philos, int i)
 		pthread_mutex_lock(&philos[i].data->log_mutex);
 		pthread_mutex_lock(&philos[i].data->stop_flag_mutex);
 		philos[i].data->stop_flag = 1;
-		printf("%lld %zu died\n", timestamp, philos[i].x);
+		printf("%lld %d died\n", timestamp, philos[i].x);
 		pthread_mutex_unlock(&philos[i].data->stop_flag_mutex);
 		pthread_mutex_unlock(&philos[i].data->log_mutex);
 		return (1);
@@ -54,7 +54,7 @@ static void	check_eat_per_philo(int i, t_philo *philos,
 static int	monitor_loop_per_philo(t_philo *philos, t_data *data,
 		int *full_eat_people)
 {
-	size_t	i;
+	int	i;
 
 	i = 0;
 	while (i < data->n_philo)

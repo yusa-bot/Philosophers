@@ -22,7 +22,7 @@ void	log_print(t_philo *philo, char *msg)
 	pthread_mutex_lock(&philo->data->log_mutex);
 	pthread_mutex_lock(&philo->data->stop_flag_mutex);
 	if (!philo->data->stop_flag)
-		printf("%lld %zu %s\n", timestamp, philo->x, msg);
+		printf("%lld %d %s\n", timestamp, philo->x, msg);
 	pthread_mutex_unlock(&philo->data->stop_flag_mutex);
 	pthread_mutex_unlock(&philo->data->log_mutex);
 }

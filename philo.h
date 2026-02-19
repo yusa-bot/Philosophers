@@ -45,9 +45,9 @@ typedef struct s_data
 
 typedef struct s_philo
 {
-	int			x;
+	int				x;
 
-	int			eat_count;
+	int				eat_count;
 	long long		last_eat_time;
 
 	pthread_mutex_t	*fork_left;

@@ -14,7 +14,7 @@
 
 static void	mutexes_destroy(t_data *data, t_philo *philos)
 {
-	size_t	i;
+	int	i;
 
 	if (data->stop_flag_mutex_succ)
 		pthread_mutex_destroy(&data->stop_flag_mutex);

@@ -17,7 +17,7 @@ static int	run_threads(t_philo *philos, pthread_t *threads, t_data *data)
 	int	i;
 
 	i = 0;
-	while (i < (int)data->n_philo)
+	while (i < data->n_philo)
 	{
 		if (pthread_create(&threads[i], NULL, philosopher_routine, &philos[i]))
 		{
@@ -35,7 +35,7 @@ static int	run_threads(t_philo *philos, pthread_t *threads, t_data *data)
 
 static int	run_philo(t_philo *philos, t_data *data, pthread_t *threads)
 {
-	size_t	i;
+	int	i;
 
 	data->start_time = get_time_us();
 	i = 0;
@@ -52,7 +52,7 @@ static int	run_philo(t_philo *philos, t_data *data, pthread_t *threads)
 
 static void	end_philo(t_philo **philos, t_data data, pthread_t *threads)
 {
-	size_t	i;
+	int	i;
 
 	i = 0;
 	while (i < data.n_philo)

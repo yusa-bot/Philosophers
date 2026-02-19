@@ -6,7 +6,7 @@
 /*   By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 19:32:12 by ayusa             #+#    #+#             */
-/*   Updated: 2026/02/19 10:24:06 by ayusa            ###   ########.fr       */
+/*   Updated: 2026/02/19 15:08:23 by ayusa            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,9 @@ typedef struct s_data
 	int				ac;
 	int				n_must_eat_per_philo;
 
-	int				time_to_eat_us;
-	int				time_to_sleep_us;
-	int				time_to_die_us;
+	long long		time_to_eat_us;
+	long long		time_to_sleep_us;
+	long long		time_to_die_us;
 
 	pthread_mutex_t	*forks_mutex;
 	pthread_mutex_t	stop_flag_mutex;
@@ -55,6 +55,9 @@ typedef struct s_philo
 
 	pthread_mutex_t	meal_mutex;
 	int				meal_mutex_succ;
+
+	int				left_philo_eat;
+	int				right_philo_eat;
 
 	t_data			*data;
 }					t_philo;

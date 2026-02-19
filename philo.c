@@ -6,11 +6,17 @@
 /*   By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 20:10:31 by ayusa             #+#    #+#             */
-/*   Updated: 2026/02/18 16:40:09 by ayusa            ###   ########.fr       */
+/*   Updated: 2026/02/19 14:49:14 by ayusa            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
+
+void log_neighbor_eat(t_philo *philo)
+{
+	philo[i - 1].left_philo_eat = 1;
+	philo[i + 1].right_philo_eat = 1;
+}
 
 // philosopher_routine
 static int	eat_routine(t_philo *philo)
@@ -23,6 +29,9 @@ static int	eat_routine(t_philo *philo)
 		return (1);
 	pthread_mutex_lock(&philo->meal_mutex);
 	philo->eat_count++;
+
+	log_neighbor_eat(philo);
+
 	pthread_mutex_unlock(&philo->meal_mutex);
 	pthread_mutex_unlock(philo->fork_left);
 	pthread_mutex_unlock(philo->fork_right);
@@ -72,6 +81,17 @@ static int	philo_cycle(t_philo *philo)
 	return (stop);
 }
 
+check_neighbor_eat()
+{
+	if (もし隣の哲学者がお腹を空かせている)
+	{
+		if (自分の前回の食事以降にその隣人がまだ食事をしていない)
+		{
+			自分はその共有フォークを手に取らない（＝隣人に譲る）
+		}
+	}
+}
+
 void	*philosopher_routine(void *arg)
 {
 	t_philo	*philo;
@@ -83,9 +103,12 @@ void	*philosopher_routine(void *arg)
 		if_one_philo(philo);
 		return (NULL);
 	}
-	if (philo->x % 2 == 0)
-		ft_usleep(philo->data->time_to_eat_us);
+	// if (philo->x % 2 == 0)
+	// 	ft_usleep(philo->data->time_to_eat_us);
 	stop = 0;
+
+	check_neighbor_eat();
+
 	while (!stop)
 		stop = philo_cycle(philo);
 	return (NULL);

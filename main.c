@@ -6,7 +6,7 @@
 /*   By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 19:32:31 by ayusa             #+#    #+#             */
-/*   Updated: 2026/02/19 10:23:21 by ayusa            ###   ########.fr       */
+/*   Updated: 2026/02/19 15:26:20 by ayusa            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,17 +50,17 @@ static int	run_philo(t_philo *philos, t_data *data, pthread_t *threads)
 	return (0);
 }
 
-static void	end_philo(t_philo **philos, t_data data, pthread_t *threads)
+static void	end_philo(t_philo **philos, t_data *data, pthread_t *threads)
 {
 	int	i;
 
 	i = 0;
-	while (i < data.n_philo)
+	while (i < data->n_philo)
 	{
 		pthread_join(threads[i], NULL);
 		i++;
 	}
-	handle_cleanup(philos, &data);
+	handle_cleanup(philos, data);
 	free(threads);
 }
 
@@ -82,6 +82,6 @@ int	main(int ac, char **av)
 		handle_cleanup(&philos, &data);
 		return (1);
 	}
-	end_philo(&philos, data, threads);
+	end_philo(&philos, &data, threads);
 	return (0);
 }

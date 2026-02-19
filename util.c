@@ -6,7 +6,7 @@
 /*   By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 18:10:41 by ayusa             #+#    #+#             */
-/*   Updated: 2026/02/19 10:59:39 by ayusa            ###   ########.fr       */
+/*   Updated: 2026/02/19 15:36:22 by ayusa            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,22 +27,6 @@ void	log_print(t_philo *philo, char *msg)
 	pthread_mutex_unlock(&philo->data->log_mutex);
 }
 
-int	ft_usleep(int us)
-{
-	while (us >= 1000000)
-	{
-		if (usleep(999999) < 0)
-			return (1);
-		us -= 999999;
-	}
-	if (us > 0)
-	{
-		if (usleep(us) < 0)
-			return (1);
-	}
-	return (0);
-}
-
 long long	get_time_us(void)
 {
 	struct timeval	tv;
@@ -50,6 +34,22 @@ long long	get_time_us(void)
 	if (gettimeofday(&tv, NULL) < 0)
 		return (1);
 	return (tv.tv_sec * 1000000LL + tv.tv_usec);
+}
+
+int	ft_usleep(int us)
+{
+	while (us >= 500)
+	{
+		if (usleep(499) < 0)
+			return (1);
+		us -= 499;
+	}
+	if (us > 0)
+	{
+		if (usleep(us) < 0)
+			return (1);
+	}
+	return (0);
 }
 
 // ft_atoi

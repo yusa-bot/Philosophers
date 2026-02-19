@@ -6,7 +6,7 @@
 /*   By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 20:13:19 by ayusa             #+#    #+#             */
-/*   Updated: 2026/02/18 13:51:22 by ayusa            ###   ########.fr       */
+/*   Updated: 2026/02/19 14:46:03 by ayusa            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,10 @@ static int	init_philo(t_philo *philos, t_data *data)
 		philos[i].last_eat_time = 0;
 		philos[i].fork_left = &data->forks_mutex[i];
 		philos[i].fork_right = &data->forks_mutex[(i + 1) % data->n_philo];
+
+		philos[i].left_philo_eat = 0;
+		philos[i].right_philo_eat = 0;
+
 		philos[i].data = data;
 		i++;
 	}

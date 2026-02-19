@@ -89,6 +89,8 @@ int	init_all(char **av, t_philo **philos,
 		t_data *data, pthread_t **threads)
 {
 	data->n_philo = ft_atoi(av[1]);
+	if (data->n_philo < 1)
+		return (1);
 	*philos = malloc(sizeof(t_philo) * (data->n_philo));
 	if (!*philos)
 		return (1);

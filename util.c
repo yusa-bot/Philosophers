@@ -6,7 +6,7 @@
 /*   By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 18:10:41 by ayusa             #+#    #+#             */
-/*   Updated: 2026/02/18 14:54:36 by ayusa            ###   ########.fr       */
+/*   Updated: 2026/02/19 10:59:39 by ayusa            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,12 +91,12 @@ int	ft_atoi(const char *str)
 		str++;
 	while (*str >= '0' && *str <= '9')
 	{
-		if (check_overflow(sign, result, *str) == 1)
-			return (-2);
-		if (check_overflow(sign, result, *str) == -1)
+		if (check_overflow(sign, result, *str))
 			return (-2);
 		result = result * 10 + (long)(*str - '0');
 		str++;
 	}
+	if (*str != '\0')
+		return (-2);
 	return ((int)(result * sign));
 }

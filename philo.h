@@ -6,7 +6,7 @@
 /*   By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 19:32:12 by ayusa             #+#    #+#             */
-/*   Updated: 2026/02/18 13:53:03 by ayusa            ###   ########.fr       */
+/*   Updated: 2026/02/19 10:24:06 by ayusa            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ typedef struct s_data
 	long long		start_time;
 
 	int				stop_flag;
-	size_t			n_philo;
+	int				n_philo;
 
 	int				ac;
 	int				n_must_eat_per_philo;
@@ -45,9 +45,9 @@ typedef struct s_data
 
 typedef struct s_philo
 {
-	size_t			x;
+	int			x;
 
-	size_t			eat_count;
+	int			eat_count;
 	long long		last_eat_time;
 
 	pthread_mutex_t	*fork_left;

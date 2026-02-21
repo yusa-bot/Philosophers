@@ -1,0 +1,129 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   init.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/02/17 20:13:19 by ayusa             #+#    #+#             */
+/*   Updated: 2026/02/21 22:19:41 by ayusa            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "philo.h"
+
+static int	mutexes_init(t_data *data)
+{
+	if (pthread_mutex_init(&data->stop_flag_mutex, NULL))
+		return (1);
+	data->stop_flag_mutex_succ = 1;
+	if (pthread_mutex_init(&data->log_mutex, NULL))
+		return (1);
+	data->log_mutex_succ = 1;
+	if (pthread_mutex_init(&data->start_mutex, NULL))
+		return (1);
+	data->start_mutex_succ = 1;
+	return (0);
+}
+
+// av: n_philo(1) t_die(2) t_eat(3) t_sleep(4) n_must_eat_per_philo(5)
+static int	init_data(t_data *data, char **av)
+{
+	data->stop_flag_mutex_succ = 0;
+	data->log_mutex_succ = 0;
+	data->stop_flag = 0;
+	data->n_philo = ft_atoi(av[1]);
+	data->time_to_die_us = ft_atoi(av[2]) * 1000;
+	data->time_to_eat_us = ft_atoi(av[3]) * 1000;
+	data->time_to_sleep_us = ft_atoi(av[4]) * 1000;
+	if (data->ac == 6)
+	{
+		data->n_must_eat_per_philo = ft_atoi(av[5]);
+		if (data->n_must_eat_per_philo == -1)
+			return (1);
+	}
+	else
+		data->n_must_eat_per_philo = -1;
+	if (mutexes_init(data))
+		return (1);
+	data->start_ready = 0;
+	if (data->n_philo < 1 || data->time_to_die_us < 1
+		|| data->time_to_eat_us < 1 || data->time_to_sleep_us < 1
+		|| data->n_must_eat_per_philo == 0 || data->n_must_eat_per_philo < -1)
+		return (1);
+	return (0);
+}
+
+static int	init_philo(t_philo *philos, t_data *data)
+{
+	int	i;
+
+	i = 0;
+	while (i < data->n_philo)
+	{
+		philos[i].x = i + 1;
+		philos[i].meal_mutex_succ = 0;
+		if (pthread_mutex_init(&philos[i].meal_mutex, NULL))
+			return (1);
+		philos[i].meal_mutex_succ = 1;
+		philos[i].eat_count = 0;
+		philos[i].last_eat_time = 0;
+		philos[i].fork_left = &data->forks_mutex[i];
+		philos[i].fork_right = &data->forks_mutex[(i + 1) % data->n_philo];
+		philos[i].data = data;
+		i++;
+	}
+	return (0);
+}
+
+static int	forks_generate(t_data *data)
+{
+	int	i;
+
+	data->forks_mutex_succ = 0;
+	data->forks_mutex
+		= malloc(sizeof(pthread_mutex_t) * (data->n_philo));
+	if (!data->forks_mutex)
+		return (1);
+	memset(data->forks_mutex, 0, sizeof(pthread_mutex_t) * (data->n_philo));
+	i = 0;
+	while (i < data->n_philo)
+	{
+		if (pthread_mutex_init(&data->forks_mutex[i], NULL))
+		{
+			while (--i >= 0)
+				pthread_mutex_destroy(&data->forks_mutex[i]);
+			return (1);
+		}
+		i++;
+	}
+	data->forks_mutex_succ = 1;
+	return (0);
+}
+
+int	init_all(char **av, t_philo **philos,
+		t_data *data, pthread_t **pthreads)
+{
+	data->n_philo = ft_atoi(av[1]);
+	if (data->n_philo < 1)
+		return (1);
+	*philos = malloc(sizeof(t_philo) * (data->n_philo));
+	if (!*philos)
+		return (1);
+	memset(*philos, 0, sizeof(t_philo) * (data->n_philo));
+	if (forks_generate(data))
+		return (free(*philos), 1);
+	if (init_data(data, av))
+		return (handle_cleanup(philos, data), 1);
+	*pthreads = malloc(sizeof(pthread_t) * data->n_philo);
+	if (!*pthreads)
+		return (handle_cleanup(philos, data), 1);
+	memset(*pthreads, 0, sizeof(pthread_t) * data->n_philo);
+	if (init_philo(*philos, data))
+	{
+		free(*pthreads);
+		handle_cleanup(philos, data);
+		return (1);
+	}
+	return (0);
+}

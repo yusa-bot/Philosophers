@@ -6,7 +6,7 @@
 /*   By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 20:10:31 by ayusa             #+#    #+#             */
-/*   Updated: 2026/02/21 17:04:35 by ayusa            ###   ########.fr       */
+/*   Updated: 2026/02/21 17:37:48 by ayusa            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@ static void	one_philo(t_philo	*philo)
 	pthread_mutex_unlock(philo->fork_left);
 }
 
-// all pthread_create と philos[i].last_eat_time = get_time_us() が all 終わっているか？
 static void	wait_all_pthread(t_philo *philo)
 {
 	while (1)

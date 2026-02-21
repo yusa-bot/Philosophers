@@ -6,7 +6,7 @@
 /*   By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 20:13:19 by ayusa             #+#    #+#             */
-/*   Updated: 2026/02/19 23:17:27 by ayusa            ###   ########.fr       */
+/*   Updated: 2026/02/20 17:02:26 by ayusa            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,10 +53,8 @@ static int	init_data(t_data *data, char **av)
 static int	init_philo(t_philo *philos, t_data *data)
 {
 	int	i;
-	int	n;
 
 	i = 0;
-	n = data->n_philo;
 	while (i < data->n_philo)
 	{
 		philos[i].x = i + 1;
@@ -83,6 +81,7 @@ static int	forks_generate(t_data *data)
 		= malloc(sizeof(pthread_mutex_t) * (data->n_philo));
 	if (!data->forks_mutex)
 		return (1);
+	memset(data->forks_mutex, 0, sizeof(pthread_mutex_t) * (data->n_philo));
 	i = 0;
 	while (i < data->n_philo)
 	{
@@ -107,6 +106,7 @@ int	init_all(char **av, t_philo **philos,
 	*philos = malloc(sizeof(t_philo) * (data->n_philo));
 	if (!*philos)
 		return (1);
+	memset(*philos, 0, sizeof(t_philo) * (data->n_philo));
 	if (forks_generate(data))
 		return (free(*philos), 1);
 	if (init_data(data, av))
@@ -114,6 +114,7 @@ int	init_all(char **av, t_philo **philos,
 	*pthreads = malloc(sizeof(pthread_t) * data->n_philo);
 	if (!*pthreads)
 		return (handle_cleanup(philos, data), 1);
+	memset(*pthreads, 0, sizeof(pthread_t) * data->n_philo);
 	if (init_philo(*philos, data))
 	{
 		free(*pthreads);

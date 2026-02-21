@@ -6,13 +6,13 @@
 #    By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/02/17 20:20:42 by ayusa             #+#    #+#              #
-#    Updated: 2026/02/19 23:28:58 by ayusa            ###   ########.fr        #
+#    Updated: 2026/02/21 17:33:22 by ayusa            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = philo
 
-SRCS = main.c init.c philo.c monitor.c cleanup.c util.c philo_routine.c
+SRCS = main.c init.c philo.c monitor.c cleanup_utils.c util.c philo_routine.c
 OBJS = $(SRCS:.c=.o)
 DEPS = $(OBJS:.o=.d)
 

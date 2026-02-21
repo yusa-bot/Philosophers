@@ -6,7 +6,7 @@
 /*   By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 19:32:12 by ayusa             #+#    #+#             */
-/*   Updated: 2026/02/19 23:31:12 by ayusa            ###   ########.fr       */
+/*   Updated: 2026/02/21 14:33:08 by ayusa            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include <stdlib.h>
 # include <sys/time.h>
 # include <unistd.h>
+# include <string.h>
 
 typedef struct s_data
 {
@@ -65,6 +66,7 @@ typedef struct s_philo
 
 void				log_print(t_philo *philo, char *msg);
 void				ft_usleep(long long us);
+void				ft_usleep_to_target_time(long long target_time_us);
 long long			get_time_us(void);
 int					ft_atoi(const char *str);
 void				handle_cleanup(t_philo **philos, t_data *data);
@@ -72,7 +74,6 @@ void				monitor_loop(t_philo *philos, t_data *data);
 void				*philosopher_routine_handle(void *arg);
 int					init_all(char **av, t_philo **philos,
 						t_data *data, pthread_t **pthreads);
-int					eat_routine(t_philo *philo);
-int					think_routine(t_philo *philo);
+int					philosopher_routine(t_philo *philo);
 
 #endif

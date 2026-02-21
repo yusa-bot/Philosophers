@@ -6,11 +6,25 @@
 /*   By: ayusa <ayusa@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 19:32:31 by ayusa             #+#    #+#             */
-/*   Updated: 2026/02/19 23:25:12 by ayusa            ###   ########.fr       */
+/*   Updated: 2026/02/21 17:03:42 by ayusa            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
+
+static void	end_philo(t_philo **philos, t_data *data, pthread_t *pthreads)
+{
+	int	i;
+
+	i = 0;
+	while (i < data->n_philo)
+	{
+		pthread_join(pthreads[i], NULL);
+		i++;
+	}
+	handle_cleanup(philos, data);
+	free(pthreads);
+}
 
 static int	run_pthreads(t_philo *philos, pthread_t *pthreads, t_data *data)
 {
@@ -60,20 +74,6 @@ static int	run_philo(t_philo *philos, t_data *data, pthread_t *pthreads)
 		return (1);
 	monitor_loop(philos, data);
 	return (0);
-}
-
-static void	end_philo(t_philo **philos, t_data *data, pthread_t *pthreads)
-{
-	int	i;
-
-	i = 0;
-	while (i < data->n_philo)
-	{
-		pthread_join(pthreads[i], NULL);
-		i++;
-	}
-	handle_cleanup(philos, data);
-	free(pthreads);
 }
 
 // n_philo, time_to_die, time_to_eat, time_to_sleep, n_must_eat
